@@ -24,12 +24,14 @@
 
 #include "polyhedral/sphere.h"
 #include "polyhedral/polyhedra/decakis_dodecahedron.h"
+#include "polyhedral/polyhedra/hexakis_icosahedron.h"
 #include "polyhedral/polyhedra/hexakis_tetrahedron.h"
 #include "polyhedral/nets/dsea/a5.h"
 #include "polyhedral/nets/dsea/crescent.h"
 #include "polyhedral/nets/dsea/dsea.h"
 #include "polyhedral/nets/dsea/icosahedron.h"
 #include "polyhedral/nets/dsea/two_flower.h"
+#include "polyhedral/nets/isea2/isea2.h"
 #include "polyhedral/nets/tsea/tsea.h"
 
 #include "proj.h"
@@ -108,6 +110,22 @@ PJ *PJ_PROJECTION(dsea) {
     }
 
     polyhedral::set_orient_from_angles(Q, 90.0, 0.0, 93.0);
+    P->fwd = polyhedral_fwd;
+    P->inv = polyhedral_inv;
+    return P;
+}
+
+PROJ_HEAD(isea2, "Icosahedral Snyder Equal Area (generalized)") "\n\tSph";
+constexpr double ISEA_STD_LAT_DEG = 58.282525588539;
+constexpr double ISEA_STD_LON_DEG = 11.25;
+PJ *PJ_PROJECTION(isea2) { // TODO rename to `isea`?
+    auto *Q = static_cast<pj_polyhedral_data *>( calloc(1, sizeof(pj_polyhedral_data)));
+    if (nullptr == Q) return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = Q;
+
+    polyhedral::load_triangles(Q, hexakis_icosahedron::SPH_TRI, nets::isea2::isea2::FACE_TRI);
+    polyhedral::set_orient_from_angles(Q, ISEA_STD_LAT_DEG, ISEA_STD_LON_DEG, 0.0);
+
     P->fwd = polyhedral_fwd;
     P->inv = polyhedral_inv;
     return P;
