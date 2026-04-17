@@ -31,6 +31,10 @@ $RENDER --proj="+proj=isea2 +R=1" \
     --title="ISEA: Icosahedral Snyder Equal Area" \
     -o isea_net.png
 
+$RENDER --proj="+proj=ivea +R=1" \
+    --title="IVEA: DSEA unfolded onto icosahedral net" \
+    -o ivea_net.png
+
 $RENDER --proj="+proj=tsea +R=1" \
     --title="TSEA: Tetrahedral Snyder Equal Area" \
     -o tsea_net.png

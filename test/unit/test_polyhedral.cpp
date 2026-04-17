@@ -43,6 +43,7 @@ static const char *proj_strings[] = {
     "+proj=dsea +net=two_flower +R=1",
     "+proj=dsea +net=icosahedron +R=1",
     "+proj=isea2 +R=1",
+    "+proj=ivea +R=1",
 };
 
 static void roundtrip_test(const char *proj_string, double tolerance) {

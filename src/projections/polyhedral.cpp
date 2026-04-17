@@ -131,6 +131,21 @@ PJ *PJ_PROJECTION(isea2) { // TODO rename to `isea`?
     return P;
 }
 
+PROJ_HEAD(ivea, "Icosahedral Vertex Equal Area") "\n\tSph";
+constexpr double IVEA_AZ_DEG = 36.0;
+PJ *PJ_PROJECTION(ivea) {
+    auto *Q = static_cast<pj_polyhedral_data *>(calloc(1, sizeof(pj_polyhedral_data)));
+    if (nullptr == Q) return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = Q;
+
+    polyhedral::load_triangles(Q, decakis_dodecahedron::SPH_TRI, nets::dsea::icosahedron::FACE_TRI);
+    polyhedral::set_orient_from_angles(Q, ISEA_STD_LAT_DEG, ISEA_STD_LON_DEG, IVEA_AZ_DEG);
+
+    P->fwd = polyhedral_fwd;
+    P->inv = polyhedral_inv;
+    return P;
+}
+
 PROJ_HEAD(tsea, "Tetrahedral Snyder Equal Area") "\n\tSph";
 PJ *PJ_PROJECTION(tsea) {
     auto *Q = static_cast<pj_polyhedral_data *>(calloc(1, sizeof(pj_polyhedral_data)));
