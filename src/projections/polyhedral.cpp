@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project:  PROJ
- * Purpose:  Polyhedral Snyder equal-area map projections.
+ * Purpose:  Polyhedral Snyder equal-area map projections (ISEA, DSEA, TSEA...)
  * Author:   Felix Palmer
  *
  ******************************************************************************
@@ -23,13 +23,20 @@
  ****************************************************************************/
 
 #include "polyhedral/sphere.h"
+#include "polyhedral/polyhedra/decakis_dodecahedron.h"
 #include "polyhedral/polyhedra/hexakis_tetrahedron.h"
+#include "polyhedral/nets/dsea/a5.h"
+#include "polyhedral/nets/dsea/crescent.h"
+#include "polyhedral/nets/dsea/dsea.h"
+#include "polyhedral/nets/dsea/icosahedron.h"
+#include "polyhedral/nets/dsea/two_flower.h"
 #include "polyhedral/nets/tsea/tsea.h"
 
 #include "proj.h"
 #include "proj_internal.h"
 
 #include <cstdlib>
+#include <cstring>
 
 using polyhedral::pj_polyhedral_data;
 
@@ -73,6 +80,37 @@ static PJ_LP polyhedral_inv(PJ_XY xy, PJ *P) {
 
     proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
     return proj_coord_error().lp;
+}
+
+// Snyder Equal Areas projection definitions
+PROJ_HEAD(dsea, "Dodecahedral Snyder Equal Area") "\n\tSph";
+PJ *PJ_PROJECTION(dsea) {
+    auto *Q = static_cast<pj_polyhedral_data *>(calloc(1, sizeof(pj_polyhedral_data)));
+    if (nullptr == Q) return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = Q;
+
+    // Select net layout: +net=dsea (default), a5, crescent, two_flower,
+    // or icosahedron.
+    const char *net = pj_param(P->ctx, P->params, "snet").s;
+    if (net == nullptr || strcmp(net, "dsea") == 0) {
+        polyhedral::load_triangles(Q, decakis_dodecahedron::SPH_TRI, nets::dsea::dsea::FACE_TRI);
+    } else if (strcmp(net, "a5") == 0) {
+        polyhedral::load_triangles(Q, decakis_dodecahedron::SPH_TRI, nets::dsea::a5::FACE_TRI);
+    } else if (strcmp(net, "crescent") == 0) {
+        polyhedral::load_triangles(Q, decakis_dodecahedron::SPH_TRI, nets::dsea::crescent::FACE_TRI);
+    } else if (strcmp(net, "two_flower") == 0) {
+        polyhedral::load_triangles(Q, decakis_dodecahedron::SPH_TRI, nets::dsea::two_flower::FACE_TRI);
+    } else if (strcmp(net, "icosahedron") == 0) {
+        polyhedral::load_triangles(Q, decakis_dodecahedron::SPH_TRI, nets::dsea::icosahedron::FACE_TRI);
+    } else {
+        proj_log_error(P, "unknown net (expected dsea, a5, crescent, two_flower or icosahedron)");
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    polyhedral::set_orient_from_angles(Q, 90.0, 0.0, 93.0);
+    P->fwd = polyhedral_fwd;
+    P->inv = polyhedral_inv;
+    return P;
 }
 
 PROJ_HEAD(tsea, "Tetrahedral Snyder Equal Area") "\n\tSph";

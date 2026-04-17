@@ -37,6 +37,11 @@ static const RoundtripPoint test_points[] = {
 
 static const char *proj_strings[] = {
     "+proj=tsea +R=1",
+    "+proj=dsea +R=1",
+    "+proj=dsea +net=a5 +R=1",
+    "+proj=dsea +net=crescent +R=1",
+    "+proj=dsea +net=two_flower +R=1",
+    "+proj=dsea +net=icosahedron +R=1",
 };
 
 static void roundtrip_test(const char *proj_string, double tolerance) {
